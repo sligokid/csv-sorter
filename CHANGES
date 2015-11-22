@@ -1,0 +1,64 @@
+V1.0.0
+--------------
+Initial Release
+	This program opens access logs, processes them into client csvs, working on timeblocks of 15 mins. 
+	If it cannot find an access log it will wait a config time(currently 1 sec) and retry it, before ignoreing and moveing to the next file.
+	If it cannot find any file it presumes it is live and sleeps a config time(currently 5 mins) then retries. After finishing a block it rotates to the next timeblock
+
+	In the event of a crash the program will leave a PID file in the working dir detailing the PID and the working TIMEBLOCK. 
+	It should be restarted given the seed time of the next timeblock. ie 1745. When 0000 is the seed it removes the csvs for the process day before starting. 
+	This program runs live and is cronned by user root.
+
+	<usage>
+	./sort config/sort.conf <date> <seed>
+
+	See ./sort -h for details
+kmcgowan 20060821
+======================================================================
+V1.0.1
+Added.
+- 1. done flag file
+- 2. Added UT cases for CSVLineBase
+- 3. Empty field workaround
+
+- 1. done flag file
+	Signal the inserts process accross the nfs mount that the process has completed for the day.
+	Create a file sort_done_<date>.csv in the csv directory
+	This was necessary for compatibility with the current V3 implementation	
+- 2. UT for split function
+- 3. Empty field workaround
+	Replace the "-" empty field char in Logs with a blank fielda in generated CSV
+kmcgowan 20060831
+=======================================================================
+V1.0.2
+Fix.
+- 1. XOR cookies 
+
+- 1. XOR cookies 
+	Stack Collecion servers generate a unique 32 char string for user / session cookies only unique in 32 char entirity. 
+	We use chars [1-16], as this was acceptable to be unique when BM Collection uses md5. The resulting bug in this case was a high rate 
+	of cookie collision (approx 400%). As a workaround tests showed that XOR first and second half of cookies generated a unique 16 char int which we 
+	convert to HEX.
+kmcgowan 20060904
+=======================================================================
+V1.0.3
+Fix.
+- 1. Non Js Referrer Fix 
+	Recognise non JS tags with referrer present
+- 2. GMT cleanup removal
+	Cant remove csv's when seeded with 0000 anymore.
+	A real fix is required here
+kmcgowan 20060908
+=======================================================================
+V1.0.4
+- 1. Allow and discard a timestamp on the end of the URI 
+- 2. Write failed log lines to a .logfail file for verification
+kmcgowan 20061006
+=======================================================================
+=======================================================================
+V1.0.5
+- 1. Only translate 32 char cookies, skip 16 char cookies(REQ Jan1 07)
+- 2. Added UT for cookie parseing
+- 3. Turned off log_fail_line(line) to save /usr & also this debug info will not be required as sorter will be decomissioned.
+kmcgowan 20061213
+=======================================================================
